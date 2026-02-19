@@ -1,3 +1,4 @@
 {
+  "/api/rfp/upload/route": "app/api/rfp/upload/route.js",
   "/page": "app/page.js"
 }

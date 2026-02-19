@@ -13,10 +13,7 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col items-center gap-10 w-full">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-navy-light px-3.5 py-1.5 text-xs font-medium text-navy mb-6">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-patriot-red opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-patriot-red" />
-            </span>
+            <span role="img" aria-label="American flag">🇺🇸</span>
             Proudly Serving American Contractors
           </div>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">

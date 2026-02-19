@@ -27,13 +27,13 @@ export function BillingSection() {
         title="Current Plan"
         description="Your billing and subscription details"
       >
-        <div className="flex items-center justify-between rounded-xl border border-border bg-secondary/50 p-4">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-gray-50 p-4">
           <div>
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold">Pay-Per-Bid</p>
               <Badge
                 variant="outline"
-                className="border-neon-green/30 bg-neon-green/5 text-neon-green text-[10px]"
+                className="border-emerald-600/20 bg-emerald-50 text-emerald-700 text-[10px]"
               >
                 Active
               </Badge>

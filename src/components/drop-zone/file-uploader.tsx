@@ -102,10 +102,10 @@ export function FileUploader() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-300 ${
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-300 bg-white shadow-sm ${
           isDragging
-            ? "border-neon-blue bg-neon-blue/5 glow-blue-strong"
-            : "border-border hover:border-neon-blue/50 hover:bg-neon-blue/[0.02]"
+            ? "border-brand bg-brand-light shadow-md"
+            : "border-gray-300 hover:border-brand/50 hover:shadow-md"
         }`}
       >
         <input
@@ -123,18 +123,18 @@ export function FileUploader() {
         >
           <div
             className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 ${
-              isDragging ? "bg-neon-blue/20" : "bg-secondary"
+              isDragging ? "bg-brand/15" : "bg-brand-light"
             }`}
           >
             <Upload
               className={`h-7 w-7 transition-colors ${
-                isDragging ? "text-neon-blue" : "text-muted-foreground"
+                isDragging ? "text-brand" : "text-brand/70"
               }`}
             />
           </div>
 
           <div>
-            <p className="text-lg font-medium">
+            <p className="text-lg font-semibold text-foreground">
               {isDragging ? "Drop your RFP here" : "Upload your RFP"}
             </p>
             <p className="mt-1.5 text-sm text-muted-foreground">
@@ -142,7 +142,7 @@ export function FileUploader() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
             <span>PDF, DOC, DOCX up to 50MB</span>
           </div>
@@ -163,12 +163,12 @@ export function FileUploader() {
           <Input
             type="url"
             placeholder="https://sam.gov/opp/..."
-            className="h-11 pl-10 bg-secondary border-border focus:border-neon-blue/50"
+            className="h-11 pl-10 bg-white border-border focus:border-brand"
           />
         </div>
         <Button
           type="submit"
-          className="h-11 bg-neon-blue text-white hover:bg-neon-blue-dim px-6"
+          className="h-11 bg-brand text-white hover:bg-brand-dark px-6"
         >
           Analyze
         </Button>
@@ -196,26 +196,20 @@ function UploadingState({
       animate={{ opacity: 1, scale: 1 }}
       className="w-full max-w-lg mx-auto"
     >
-      <div className="rounded-2xl border border-border bg-card p-8 glow-blue">
+      <div className="rounded-2xl border border-border bg-white p-8 shadow-sm">
         <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            <motion.div
-              animate={{ rotate: isComplete ? 0 : 360 }}
-              transition={{
-                duration: 2,
-                repeat: isComplete ? 0 : Infinity,
-                ease: "linear",
-              }}
+            <div
               className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
-                isComplete ? "bg-neon-green/20" : "bg-neon-blue/10"
+                isComplete ? "bg-success-light" : "bg-brand-light"
               }`}
             >
               {isComplete ? (
-                <CheckCircle2 className="h-8 w-8 text-neon-green" />
+                <CheckCircle2 className="h-8 w-8 text-success" />
               ) : (
-                <Loader2 className="h-8 w-8 text-neon-blue animate-spin" />
+                <Loader2 className="h-8 w-8 text-brand animate-spin" />
               )}
-            </motion.div>
+            </div>
           </div>
 
           <div className="w-full text-center">
@@ -228,7 +222,7 @@ function UploadingState({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="text-base font-medium"
+                className="text-base font-semibold text-foreground"
               >
                 {isComplete
                   ? "Analysis complete!"
@@ -242,10 +236,10 @@ function UploadingState({
               <span>Progress</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
               <motion.div
                 className={`h-full rounded-full ${
-                  isComplete ? "bg-neon-green" : "bg-neon-blue"
+                  isComplete ? "bg-success" : "bg-brand"
                 }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}

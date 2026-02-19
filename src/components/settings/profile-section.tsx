@@ -11,7 +11,7 @@ export function ProfileSection() {
     >
       <div className="flex items-center gap-4 mb-6">
         <Avatar className="h-16 w-16 border-2 border-border">
-          <AvatarFallback className="bg-neon-blue/10 text-lg font-semibold text-neon-blue">
+          <AvatarFallback className="bg-brand-light text-lg font-semibold text-brand">
             JD
           </AvatarFallback>
         </Avatar>
@@ -27,13 +27,13 @@ export function ProfileSection() {
           <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
             First Name
           </label>
-          <Input defaultValue="John" className="bg-secondary h-9" />
+          <Input defaultValue="John" className="bg-gray-50 h-9" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
             Last Name
           </label>
-          <Input defaultValue="Doe" className="bg-secondary h-9" />
+          <Input defaultValue="Doe" className="bg-gray-50 h-9" />
         </div>
         <div className="sm:col-span-2">
           <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
@@ -41,7 +41,7 @@ export function ProfileSection() {
           </label>
           <Input
             defaultValue="john.doe@acmefederal.com"
-            className="bg-secondary h-9"
+            className="bg-gray-50 h-9"
           />
         </div>
         <div className="sm:col-span-2">
@@ -50,12 +50,12 @@ export function ProfileSection() {
           </label>
           <Input
             defaultValue="Director of Business Development"
-            className="bg-secondary h-9"
+            className="bg-gray-50 h-9"
           />
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button className="bg-neon-blue text-white hover:bg-neon-blue-dim h-9 text-sm">
+        <Button className="bg-brand text-white hover:bg-brand-dark h-9 text-sm">
           Save Changes
         </Button>
       </div>

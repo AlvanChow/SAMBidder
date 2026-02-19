@@ -15,7 +15,7 @@ interface BidCardProps {
 export function BidCard({ bid, index }: BidCardProps) {
   const statusConfig = bidStatusConfig[bid.status];
   const pwinColor =
-    bid.pwin >= 70 ? "#00E68C" : bid.pwin >= 40 ? "#00B4FF" : "#F59E0B";
+    bid.pwin >= 70 ? "#2e8b57" : bid.pwin >= 40 ? "#1a73c7" : "#d4880f";
 
   return (
     <motion.div
@@ -24,7 +24,7 @@ export function BidCard({ bid, index }: BidCardProps) {
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
       <Link href={`/bid/${bid.id}`} className="block group">
-        <div className="rounded-xl border border-border bg-card p-5 transition-all hover:border-border/80 hover:bg-card/80 group-hover:glow-blue">
+        <div className="rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1.5">
@@ -38,7 +38,7 @@ export function BidCard({ bid, index }: BidCardProps) {
                   {bid.solicitationNumber}
                 </span>
               </div>
-              <h3 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-neon-blue transition-colors">
+              <h3 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-brand transition-colors">
                 {bid.title}
               </h3>
             </div>
@@ -53,7 +53,7 @@ export function BidCard({ bid, index }: BidCardProps) {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
-                    className="text-secondary"
+                    className="text-gray-100"
                   />
                   <circle
                     cx="18"
@@ -64,9 +64,6 @@ export function BidCard({ bid, index }: BidCardProps) {
                     strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeDasharray={`${(bid.pwin / 100) * 94.25} 94.25`}
-                    style={{
-                      filter: `drop-shadow(0 0 3px ${pwinColor}40)`,
-                    }}
                   />
                 </svg>
                 <span
@@ -96,17 +93,17 @@ export function BidCard({ bid, index }: BidCardProps) {
 
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 w-24 rounded-full bg-secondary overflow-hidden">
+              <div className="h-1.5 flex-1 w-24 rounded-full bg-gray-100 overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
                     width: `${bid.complianceScore}%`,
                     backgroundColor:
                       bid.complianceScore >= 90
-                        ? "#00E68C"
+                        ? "#2e8b57"
                         : bid.complianceScore >= 70
-                        ? "#00B4FF"
-                        : "#F59E0B",
+                        ? "#1a73c7"
+                        : "#d4880f",
                   }}
                 />
               </div>

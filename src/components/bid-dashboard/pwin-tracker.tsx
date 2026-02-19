@@ -33,7 +33,8 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (value / 100) * circumference;
-  const color = value >= 70 ? "#00E68C" : value >= 40 ? "#00B4FF" : "#F59E0B";
+  const color = value >= 70 ? "#2e8b57" : value >= 40 ? "#1a73c7" : "#d4880f";
+  const bgColor = value >= 70 ? "#eaf5f0" : value >= 40 ? "#e8f2fc" : "#fef7e8";
   const label = value >= 70 ? "Strong" : value >= 40 ? "Moderate" : "Low";
   const delta = value - previousValue;
   const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
@@ -47,19 +48,17 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
             cy="100"
             r={radius}
             fill="none"
-            stroke="currentColor"
+            stroke="#f1f5f9"
             strokeWidth="6"
-            className="text-secondary"
           />
           <circle
             cx="100"
             cy="100"
             r={radius}
             fill="none"
-            stroke="currentColor"
+            stroke="#e2e8f0"
             strokeWidth="6"
             strokeDasharray="4 8"
-            className="text-border opacity-50"
             transform="rotate(-90 100 100)"
           />
           <motion.circle
@@ -75,9 +74,6 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
             animate={{ strokeDashoffset }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             transform="rotate(-90 100 100)"
-            style={{
-              filter: `drop-shadow(0 0 10px ${color}50)`,
-            }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -97,7 +93,7 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
         <div
           className="flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium"
           style={{
-            backgroundColor: `${color}12`,
+            backgroundColor: bgColor,
             color,
           }}
         >
@@ -114,8 +110,8 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
             animate={{ opacity: 1, scale: 1 }}
             className={`flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${
               delta > 0
-                ? "bg-neon-green/10 text-neon-green"
-                : "bg-red-400/10 text-red-400"
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-red-50 text-red-700"
             }`}
           >
             <TrendIcon className="h-3 w-3" />

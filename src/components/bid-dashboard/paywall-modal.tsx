@@ -32,11 +32,11 @@ const features = [
 export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card border-border p-0 overflow-hidden">
-        <div className="bg-gradient-to-b from-neon-blue/10 to-transparent px-6 pt-6 pb-4">
+      <DialogContent className="sm:max-w-md bg-white border-border p-0 overflow-hidden">
+        <div className="bg-gradient-to-b from-brand-light to-transparent px-6 pt-6 pb-4">
           <DialogHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neon-blue/15 mb-3">
-              <Zap className="h-6 w-6 text-neon-blue" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 mb-3">
+              <Zap className="h-6 w-6 text-brand" />
             </div>
             <DialogTitle className="text-xl">
               Unlock Your Full Proposal
@@ -58,8 +58,8 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
                 transition={{ delay: i * 0.1 }}
                 className="flex items-center gap-3"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-neon-green/10">
-                  <feature.icon className="h-4 w-4 text-neon-green" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success-light">
+                  <feature.icon className="h-4 w-4 text-success" />
                 </div>
                 <span className="text-sm">{feature.text}</span>
               </motion.div>
@@ -68,7 +68,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
 
           <Separator />
 
-          <div className="rounded-xl border border-border bg-secondary/50 p-4">
+          <div className="rounded-xl border border-border bg-gray-50 p-4">
             <div className="flex items-baseline justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">One-time payment</p>
@@ -83,7 +83,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
                     key={text}
                     className="flex items-center gap-1.5 text-xs text-muted-foreground"
                   >
-                    <CheckCircle2 className="h-3 w-3 text-neon-green" />
+                    <CheckCircle2 className="h-3 w-3 text-success" />
                     {text}
                   </div>
                 ))}
@@ -92,7 +92,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
           </div>
 
           <Button
-            className="w-full h-11 gap-2 bg-neon-blue text-white hover:bg-neon-blue-dim glow-blue font-medium"
+            className="w-full h-11 gap-2 bg-brand text-white hover:bg-brand-dark font-medium"
             onClick={() => onOpenChange(false)}
           >
             <CreditCard className="h-4 w-4" />

@@ -82,22 +82,22 @@ export const bidStatusConfig: Record<
 > = {
   draft: {
     label: "Draft",
-    className: "border-amber-400/30 bg-amber-400/10 text-amber-400",
+    className: "border-amber-600/20 bg-amber-50 text-amber-700",
   },
   in_review: {
     label: "In Review",
-    className: "border-neon-blue/30 bg-neon-blue/10 text-neon-blue",
+    className: "border-blue-600/20 bg-blue-50 text-blue-700",
   },
   submitted: {
     label: "Submitted",
-    className: "border-neon-blue/30 bg-neon-blue/10 text-neon-blue",
+    className: "border-blue-600/20 bg-blue-50 text-blue-700",
   },
   won: {
     label: "Won",
-    className: "border-neon-green/30 bg-neon-green/10 text-neon-green",
+    className: "border-emerald-600/20 bg-emerald-50 text-emerald-700",
   },
   lost: {
     label: "Lost",
-    className: "border-red-400/30 bg-red-400/10 text-red-400",
+    className: "border-red-600/20 bg-red-50 text-red-700",
   },
 };

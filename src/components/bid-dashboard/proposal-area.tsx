@@ -15,7 +15,7 @@ export function ProposalArea({ onExportClick }: ProposalAreaProps) {
         <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
           Executive Summary
         </h3>
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
           <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line">
             {mockExecutiveSummary}
           </p>
@@ -26,7 +26,7 @@ export function ProposalArea({ onExportClick }: ProposalAreaProps) {
         <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
           Full Proposal Draft
         </h3>
-        <div className="relative rounded-xl border border-border bg-card overflow-hidden">
+        <div className="relative rounded-xl border border-border bg-white overflow-hidden shadow-sm">
           <div className="p-5 blur-[6px] select-none pointer-events-none">
             <div className="space-y-4">
               <h4 className="text-base font-semibold">
@@ -50,10 +50,10 @@ export function ProposalArea({ onExportClick }: ProposalAreaProps) {
             </div>
           </div>
 
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-4 max-w-xs text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-neon-blue/10 glow-blue">
-                <Lock className="h-6 w-6 text-neon-blue" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-light">
+                <Lock className="h-6 w-6 text-brand" />
               </div>
               <div>
                 <p className="text-base font-semibold">
@@ -66,7 +66,7 @@ export function ProposalArea({ onExportClick }: ProposalAreaProps) {
               </div>
               <Button
                 onClick={onExportClick}
-                className="gap-2 bg-neon-blue text-white hover:bg-neon-blue-dim glow-blue h-10 px-5"
+                className="gap-2 bg-brand text-white hover:bg-brand-dark h-10 px-5"
               >
                 <Download className="h-4 w-4" />
                 Export to Word

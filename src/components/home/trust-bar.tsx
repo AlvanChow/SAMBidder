@@ -19,9 +19,11 @@ export function TrustBar() {
     >
       {stats.map((stat) => (
         <div key={stat.label} className="flex items-center gap-2.5">
-          <stat.icon className="h-4 w-4 text-muted-foreground/50" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light">
+            <stat.icon className="h-4 w-4 text-brand" />
+          </div>
           <div>
-            <p className="text-sm font-semibold tabular-nums">{stat.value}</p>
+            <p className="text-sm font-semibold tabular-nums text-foreground">{stat.value}</p>
             <p className="text-[11px] text-muted-foreground">{stat.label}</p>
           </div>
         </div>

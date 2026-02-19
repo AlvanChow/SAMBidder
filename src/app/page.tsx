@@ -12,16 +12,16 @@ export default function HomePage() {
 
       <div className="relative z-10 flex flex-col items-center gap-10 w-full">
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-neon-blue/20 bg-neon-blue/5 px-3.5 py-1.5 text-xs font-medium text-neon-blue mb-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-light px-3.5 py-1.5 text-xs font-medium text-brand mb-6">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon-green opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-neon-green" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
             </span>
             AI-Powered Bid Generation
           </div>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             Win More{" "}
-            <span className="text-neon-blue text-glow-blue">Government</span>
+            <span className="text-brand">Government</span>
             <br />
             Contracts
           </h1>

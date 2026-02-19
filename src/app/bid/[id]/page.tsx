@@ -43,13 +43,13 @@ export default function BidDashboardPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
-      <div className="border-b border-border bg-card/30 backdrop-blur-sm">
+      <div className="border-b border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0">
               <Link
                 href="/"
-                className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary hover:bg-accent transition-colors"
+                className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-gray-50 hover:bg-gray-100 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Link>
@@ -57,7 +57,7 @@ export default function BidDashboardPage() {
                 <div className="flex items-center gap-2 mb-1">
                   <Badge
                     variant="outline"
-                    className="border-neon-blue/30 bg-neon-blue/5 text-neon-blue text-[10px] h-5"
+                    className="border-blue-600/20 bg-blue-50 text-blue-700 text-[10px] h-5"
                   >
                     Active Bid
                   </Badge>
@@ -97,7 +97,7 @@ export default function BidDashboardPage() {
             className="flex-1 min-w-0 space-y-6"
           >
             <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-              <div className="shrink-0 rounded-xl border border-border bg-card p-6">
+              <div className="shrink-0 rounded-xl border border-border bg-white p-6 shadow-sm">
                 <PwinTracker
                   value={pwinScore}
                   previousValue={prevScoreRef.current}

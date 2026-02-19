@@ -16,7 +16,7 @@ export function CompanySection() {
           </label>
           <Input
             defaultValue="Acme Federal Solutions, LLC"
-            className="bg-secondary h-9"
+            className="bg-gray-50 h-9"
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -24,25 +24,25 @@ export function CompanySection() {
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
               DUNS Number
             </label>
-            <Input defaultValue="078432567" className="bg-secondary h-9" />
+            <Input defaultValue="078432567" className="bg-gray-50 h-9" />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
               UEI (SAM.gov)
             </label>
-            <Input defaultValue="J8KZNM4XHCL3" className="bg-secondary h-9" />
+            <Input defaultValue="J8KZNM4XHCL3" className="bg-gray-50 h-9" />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
               CAGE Code
             </label>
-            <Input defaultValue="5RKJ7" className="bg-secondary h-9" />
+            <Input defaultValue="5RKJ7" className="bg-gray-50 h-9" />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
               Primary NAICS
             </label>
-            <Input defaultValue="541512" className="bg-secondary h-9" />
+            <Input defaultValue="541512" className="bg-gray-50 h-9" />
           </div>
         </div>
         <div>
@@ -54,7 +54,7 @@ export function CompanySection() {
               <Badge
                 key={cert}
                 variant="outline"
-                className="border-neon-green/30 bg-neon-green/5 text-neon-green"
+                className="border-emerald-600/20 bg-emerald-50 text-emerald-700"
               >
                 {cert}
               </Badge>
@@ -63,7 +63,7 @@ export function CompanySection() {
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button className="bg-neon-blue text-white hover:bg-neon-blue-dim h-9 text-sm">
+        <Button className="bg-brand text-white hover:bg-brand-dark h-9 text-sm">
           Save Changes
         </Button>
       </div>

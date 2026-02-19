@@ -7,17 +7,17 @@ const statusConfig = {
   compliant: {
     icon: CheckCircle2,
     label: "Compliant",
-    className: "text-neon-green bg-neon-green/10",
+    className: "text-emerald-700 bg-emerald-50",
   },
   partial: {
     icon: AlertTriangle,
     label: "Partial",
-    className: "text-amber-400 bg-amber-400/10",
+    className: "text-amber-700 bg-amber-50",
   },
   missing: {
     icon: XCircle,
     label: "Missing",
-    className: "text-red-400 bg-red-400/10",
+    className: "text-red-700 bg-red-50",
   },
 };
 
@@ -27,10 +27,10 @@ export function ComplianceMatrix() {
       <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
         Compliance Matrix
       </h3>
-      <div className="overflow-hidden rounded-xl border border-border">
+      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-secondary/50">
+            <tr className="border-b border-border bg-gray-50">
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                 ID
               </th>
@@ -52,7 +52,7 @@ export function ComplianceMatrix() {
               return (
                 <tr
                   key={row.id}
-                  className="border-b border-border/50 last:border-0 hover:bg-secondary/30 transition-colors"
+                  className="border-b border-border/50 last:border-0 hover:bg-gray-50/50 transition-colors"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                     {row.id}

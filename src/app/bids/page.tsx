@@ -50,7 +50,7 @@ export default function BidsPage() {
           </p>
         </div>
         <Link href="/">
-          <Button className="gap-2 bg-neon-blue text-white hover:bg-neon-blue-dim h-9 text-sm">
+          <Button className="gap-2 bg-brand text-white hover:bg-brand-dark h-9 text-sm">
             <Plus className="h-4 w-4" />
             New Bid
           </Button>
@@ -65,10 +65,10 @@ export default function BidsPage() {
               <button
                 key={status}
                 onClick={() => setFilter(filter === status ? "all" : status)}
-                className={`rounded-xl border p-3 text-center transition-all ${
+                className={`rounded-xl border p-3 text-center transition-all shadow-sm ${
                   filter === status
-                    ? "border-neon-blue/40 bg-neon-blue/5"
-                    : "border-border bg-card hover:bg-card/80"
+                    ? "border-brand/40 bg-brand-light"
+                    : "border-border bg-white hover:bg-gray-50"
                 }`}
               >
                 <p className="text-xl font-bold tabular-nums">
@@ -90,7 +90,7 @@ export default function BidsPage() {
             placeholder="Search bids by title, solicitation, or agency..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 pl-10 bg-secondary border-border"
+            className="h-10 pl-10 bg-white border-border"
           />
         </div>
         <div className="flex gap-1">
@@ -100,7 +100,7 @@ export default function BidsPage() {
               onClick={() => setFilter(opt.value)}
               className={`hidden sm:block rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
                 filter === opt.value
-                  ? "bg-neon-blue/10 text-neon-blue"
+                  ? "bg-brand/10 text-brand"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
@@ -118,7 +118,7 @@ export default function BidsPage() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary mb-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 mb-4">
             <Search className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium">No bids found</p>

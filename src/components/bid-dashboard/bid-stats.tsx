@@ -21,25 +21,29 @@ export function BidStats() {
       label: "Requirements Met",
       value: `${compliant}/${total}`,
       icon: FileCheck,
-      color: "#00E68C",
+      color: "#2e8b57",
+      bgColor: "#eaf5f0",
     },
     {
       label: "Partial",
       value: partial.toString(),
       icon: AlertTriangle,
-      color: "#F59E0B",
+      color: "#d4880f",
+      bgColor: "#fef7e8",
     },
     {
       label: "Missing",
       value: missing.toString(),
       icon: XCircle,
-      color: "#F87171",
+      color: "#c53030",
+      bgColor: "#fde8e8",
     },
     {
       label: "Time to Due",
       value: "23 days",
       icon: Clock,
-      color: "#00B4FF",
+      color: "#1a73c7",
+      bgColor: "#e8f2fc",
     },
   ];
 
@@ -51,13 +55,18 @@ export function BidStats() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="rounded-xl border border-border bg-card p-4"
+          className="rounded-xl border border-border bg-white p-4 shadow-sm"
         >
           <div className="flex items-center gap-2 mb-2">
-            <stat.icon
-              className="h-3.5 w-3.5"
-              style={{ color: stat.color }}
-            />
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-md"
+              style={{ backgroundColor: stat.bgColor }}
+            >
+              <stat.icon
+                className="h-3.5 w-3.5"
+                style={{ color: stat.color }}
+              />
+            </div>
             <span className="text-[11px] text-muted-foreground">
               {stat.label}
             </span>

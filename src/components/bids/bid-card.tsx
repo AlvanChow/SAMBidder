@@ -4,18 +4,38 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Building2, Calendar, DollarSign, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { MockBid } from "@/lib/mock-bids";
-import { bidStatusConfig } from "@/lib/mock-bids";
+import type { Bid, BidStatus } from "@/lib/supabase/types";
+
+export const bidStatusConfig: Record<BidStatus, { label: string; className: string }> = {
+  draft: { label: "Draft", className: "border-amber-600/20 bg-amber-50 text-amber-700" },
+  in_review: { label: "In Review", className: "border-blue-600/20 bg-blue-50 text-blue-700" },
+  submitted: { label: "Submitted", className: "border-blue-600/20 bg-blue-50 text-blue-700" },
+  won: { label: "Won", className: "border-emerald-600/20 bg-emerald-50 text-emerald-700" },
+  lost: { label: "Lost", className: "border-red-600/20 bg-red-50 text-red-700" },
+};
+
+function formatValue(min: number, max: number): string {
+  if (!min && !max) return "TBD";
+  const fmt = (n: number) =>
+    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1_000).toFixed(0)}K`;
+  if (min && max) return `${fmt(min)} - ${fmt(max)}`;
+  return fmt(min || max);
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "TBD";
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
 
 interface BidCardProps {
-  bid: MockBid;
+  bid: Bid;
   index: number;
 }
 
 export function BidCard({ bid, index }: BidCardProps) {
   const statusConfig = bidStatusConfig[bid.status];
   const pwinColor =
-    bid.pwin >= 70 ? "#1a7a3a" : bid.pwin >= 40 ? "#002868" : "#c27803";
+    bid.pwin_score >= 70 ? "#1a7a3a" : bid.pwin_score >= 40 ? "#002868" : "#c27803";
 
   return (
     <motion.div
@@ -28,14 +48,11 @@ export function BidCard({ bid, index }: BidCardProps) {
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1.5">
-                <Badge
-                  variant="outline"
-                  className={`text-[10px] h-5 ${statusConfig.className}`}
-                >
+                <Badge variant="outline" className={`text-[10px] h-5 ${statusConfig.className}`}>
                   {statusConfig.label}
                 </Badge>
                 <span className="text-[11px] text-muted-foreground font-mono truncate">
-                  {bid.solicitationNumber}
+                  {bid.solicitation_number || "—"}
                 </span>
               </div>
               <h3 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-navy transition-colors">
@@ -46,31 +63,15 @@ export function BidCard({ bid, index }: BidCardProps) {
             <div className="shrink-0 flex flex-col items-center">
               <div className="relative h-12 w-12">
                 <svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90">
+                  <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-100" />
                   <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    className="text-gray-100"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke={pwinColor}
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(bid.pwin / 100) * 94.25} 94.25`}
+                    cx="18" cy="18" r="15" fill="none"
+                    stroke={pwinColor} strokeWidth="2.5" strokeLinecap="round"
+                    strokeDasharray={`${(bid.pwin_score / 100) * 94.25} 94.25`}
                   />
                 </svg>
-                <span
-                  className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums"
-                  style={{ color: pwinColor }}
-                >
-                  {bid.pwin}%
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums" style={{ color: pwinColor }}>
+                  {bid.pwin_score}%
                 </span>
               </div>
             </div>
@@ -79,15 +80,15 @@ export function BidCard({ bid, index }: BidCardProps) {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Building2 className="h-3 w-3" />
-              <span className="truncate max-w-[140px]">{bid.agency}</span>
+              <span className="truncate max-w-[140px]">{bid.agency || "—"}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <DollarSign className="h-3 w-3" />
-              <span>{bid.estimatedValue}</span>
+              <span>{formatValue(bid.estimated_value_min, bid.estimated_value_max)}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3" />
-              <span>{bid.dueDate}</span>
+              <span>{formatDate(bid.due_date)}</span>
             </div>
           </div>
 
@@ -97,18 +98,14 @@ export function BidCard({ bid, index }: BidCardProps) {
                 <div
                   className="h-full rounded-full transition-all"
                   style={{
-                    width: `${bid.complianceScore}%`,
+                    width: `${bid.compliance_score}%`,
                     backgroundColor:
-                      bid.complianceScore >= 90
-                        ? "#1a7a3a"
-                        : bid.complianceScore >= 70
-                        ? "#002868"
-                        : "#c27803",
+                      bid.compliance_score >= 90 ? "#1a7a3a" : bid.compliance_score >= 70 ? "#002868" : "#c27803",
                   }}
                 />
               </div>
               <span className="text-[10px] text-muted-foreground tabular-nums">
-                {bid.complianceScore}% compliant
+                {bid.compliance_score}% compliant
               </span>
             </div>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />

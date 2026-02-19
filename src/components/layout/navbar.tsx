@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FileText, Settings, Shield } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { FileText, Settings, Shield, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/auth-context";
 
 const navLinks = [
   { href: "/bids", label: "My Bids", icon: FileText },
@@ -17,6 +18,25 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/login");
+  };
+
+  const initials = user?.user_metadata?.full_name
+    ? user.user_metadata.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : user?.email?.[0]?.toUpperCase() || "?";
+
+  const displayName =
+    user?.user_metadata?.full_name || user?.email || "Account";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-white/95 backdrop-blur-md">
@@ -57,17 +77,31 @@ export function Navbar() {
 
           <div className="ml-2 h-6 w-px bg-border" />
 
+          {user && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleSignOut}
+                  className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Sign out</TooltipContent>
+            </Tooltip>
+          )}
+
           <Tooltip>
             <TooltipTrigger asChild>
-              <button className="ml-2 transition-transform hover:scale-105">
+              <button className="ml-1 transition-transform hover:scale-105">
                 <Avatar className="h-8 w-8 border border-border">
                   <AvatarFallback className="bg-navy-light text-xs font-semibold text-navy">
-                    JD
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
               </button>
             </TooltipTrigger>
-            <TooltipContent>John Doe</TooltipContent>
+            <TooltipContent>{displayName}</TooltipContent>
           </Tooltip>
         </nav>
       </div>

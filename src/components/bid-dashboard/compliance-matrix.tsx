@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
-import { mockComplianceMatrix } from "@/lib/mock-data";
+import type { ComplianceItem } from "@/lib/supabase/types";
 
 const statusConfig = {
   compliant: {
@@ -21,7 +21,26 @@ const statusConfig = {
   },
 };
 
-export function ComplianceMatrix() {
+interface ComplianceMatrixProps {
+  items: ComplianceItem[];
+}
+
+export function ComplianceMatrix({ items }: ComplianceMatrixProps) {
+  if (items.length === 0) {
+    return (
+      <div>
+        <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
+          Compliance Matrix
+        </h3>
+        <div className="rounded-xl border border-border bg-white p-8 text-center shadow-sm">
+          <p className="text-sm text-muted-foreground">
+            Compliance requirements will appear here once the RFP has been parsed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider">
@@ -31,22 +50,14 @@ export function ComplianceMatrix() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-gray-50">
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                ID
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Requirement
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Section
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Status
-              </th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">ID</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Requirement</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Section</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
             </tr>
           </thead>
           <tbody>
-            {mockComplianceMatrix.map((row) => {
+            {items.map((row) => {
               const config = statusConfig[row.status];
               const Icon = config.icon;
               return (
@@ -55,12 +66,10 @@ export function ComplianceMatrix() {
                   className="border-b border-border/50 last:border-0 hover:bg-gray-50/50 transition-colors"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {row.id}
+                    {row.requirement_id || "—"}
                   </td>
                   <td className="px-4 py-3">{row.requirement}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {row.section}
-                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{row.section}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}

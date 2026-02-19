@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   FileText,
   Upload,
@@ -14,20 +14,30 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { mockRfpDetails } from "@/lib/mock-data";
+import type { BidWithDetails } from "@/lib/supabase/types";
 
 interface BidSidebarProps {
-  onDocumentUpload: (docType: string) => void;
+  bid: BidWithDetails;
+  onDocumentUpload: (docType: string, file: File) => Promise<void>;
   uploadedDocs: string[];
 }
 
-const rfpFields = [
-  { icon: Building2, label: "Agency", value: mockRfpDetails.agency },
-  { icon: Hash, label: "NAICS", value: mockRfpDetails.naicsCode },
-  { icon: Shield, label: "Set-Aside", value: mockRfpDetails.setAside },
-  { icon: Calendar, label: "Due Date", value: mockRfpDetails.dueDate },
-  { icon: DollarSign, label: "Est. Value", value: mockRfpDetails.estimatedValue },
-];
+function formatValue(min: number, max: number): string {
+  if (!min && !max) return "TBD";
+  const fmt = (n: number) =>
+    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1_000).toFixed(0)}K`;
+  if (min && max) return `${fmt(min)} - ${fmt(max)}`;
+  return fmt(min || max);
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "TBD";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 const uploadableDocuments = [
   { id: "past-performance", label: "Past Performance", pwinBoost: 25 },
@@ -36,15 +46,42 @@ const uploadableDocuments = [
   { id: "certifications", label: "Certifications", pwinBoost: 10 },
 ];
 
-export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) {
+export function BidSidebar({ bid, onDocumentUpload, uploadedDocs }: BidSidebarProps) {
   const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const handleUpload = async (docId: string) => {
+  const rfpFields = [
+    { icon: Building2, label: "Agency", value: bid.agency || "—" },
+    { icon: Hash, label: "NAICS", value: bid.naics_code || "—" },
+    { icon: Shield, label: "Set-Aside", value: bid.set_aside || "—" },
+    { icon: Calendar, label: "Due Date", value: formatDate(bid.due_date) },
+    {
+      icon: DollarSign,
+      label: "Est. Value",
+      value: formatValue(bid.estimated_value_min, bid.estimated_value_max),
+    },
+  ];
+
+  const handleUploadClick = (docId: string) => {
     if (uploadedDocs.includes(docId) || uploadingDoc) return;
+    fileInputRefs.current[docId]?.click();
+  };
+
+  const handleFileChange = async (
+    docId: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     setUploadingDoc(docId);
-    await new Promise((r) => setTimeout(r, 800));
-    onDocumentUpload(docId);
-    setUploadingDoc(null);
+    try {
+      await onDocumentUpload(docId, file);
+    } finally {
+      setUploadingDoc(null);
+      if (fileInputRefs.current[docId]) {
+        fileInputRefs.current[docId]!.value = "";
+      }
+    }
   };
 
   return (
@@ -56,11 +93,9 @@ export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) 
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-medium leading-snug">
-            {mockRfpDetails.title}
-          </p>
+          <p className="text-sm font-medium leading-snug">{bid.title}</p>
           <p className="font-mono text-xs text-muted-foreground">
-            {mockRfpDetails.solicitationNumber}
+            {bid.solicitation_number || "—"}
           </p>
         </div>
 
@@ -90,50 +125,60 @@ export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) 
               const isUploading = uploadingDoc === doc.id;
 
               return (
-                <Button
-                  key={doc.id}
-                  variant="outline"
-                  size="sm"
-                  className={`w-full justify-start gap-2 h-9 text-xs transition-all ${
-                    isUploaded
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-700"
-                      : "hover:border-navy/30 hover:bg-navy-light"
-                  }`}
-                  onClick={() => handleUpload(doc.id)}
-                  disabled={isUploading}
-                >
-                  <AnimatePresence mode="wait">
-                    {isUploaded ? (
-                      <motion.div
-                        key="check"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="upload"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                      >
-                        <Upload
-                          className={`h-3.5 w-3.5 ${
-                            isUploading ? "animate-pulse" : ""
-                          }`}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <span className="flex-1 text-left">{doc.label}</span>
-                  {!isUploaded && (
-                    <span className="text-[10px] text-navy font-medium">
-                      +{doc.pwinBoost}%
+                <div key={doc.id}>
+                  <input
+                    ref={(el) => {
+                      fileInputRefs.current[doc.id] = el;
+                    }}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => handleFileChange(doc.id, e)}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`w-full justify-start gap-2 h-9 text-xs transition-all ${
+                      isUploaded
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-700"
+                        : "hover:border-navy/30 hover:bg-navy-light"
+                    }`}
+                    onClick={() => handleUploadClick(doc.id)}
+                    disabled={isUploading}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isUploaded ? (
+                        <motion.div
+                          key="check"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="upload"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                        >
+                          <Upload
+                            className={`h-3.5 w-3.5 ${isUploading ? "animate-pulse" : ""}`}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <span className="flex-1 text-left">
+                      {isUploading ? "Uploading..." : doc.label}
                     </span>
-                  )}
-                </Button>
+                    {!isUploaded && (
+                      <span className="text-[10px] text-navy font-medium">
+                        +{doc.pwinBoost}%
+                      </span>
+                    )}
+                  </Button>
+                </div>
               );
             })}
           </div>

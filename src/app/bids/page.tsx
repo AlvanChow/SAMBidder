@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BidCard } from "@/components/bids/bid-card";
-import { mockBids, bidStatusConfig } from "@/lib/mock-bids";
-import type { BidStatus } from "@/lib/mock-bids";
+import { BidCard, bidStatusConfig } from "@/components/bids/bid-card";
+import type { Bid, BidStatus } from "@/lib/supabase/types";
 
 const filterOptions: { value: BidStatus | "all"; label: string }[] = [
   { value: "all", label: "All Bids" },
@@ -21,18 +20,30 @@ const filterOptions: { value: BidStatus | "all"; label: string }[] = [
 export default function BidsPage() {
   const [filter, setFilter] = useState<BidStatus | "all">("all");
   const [search, setSearch] = useState("");
+  const [bids, setBids] = useState<Bid[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockBids.filter((bid) => {
+  useEffect(() => {
+    fetch("/api/bids")
+      .then((r) => r.json())
+      .then((data) => {
+        setBids(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filtered = bids.filter((bid) => {
     const matchesFilter = filter === "all" || bid.status === filter;
     const matchesSearch =
       search === "" ||
       bid.title.toLowerCase().includes(search.toLowerCase()) ||
-      bid.solicitationNumber.toLowerCase().includes(search.toLowerCase()) ||
-      bid.agency.toLowerCase().includes(search.toLowerCase());
+      (bid.solicitation_number || "").toLowerCase().includes(search.toLowerCase()) ||
+      (bid.agency || "").toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const statusCounts = mockBids.reduce(
+  const statusCounts = bids.reduce(
     (acc, bid) => {
       acc[bid.status] = (acc[bid.status] || 0) + 1;
       return acc;
@@ -46,7 +57,7 @@ export default function BidsPage() {
         <div>
           <h1 className="text-2xl font-bold">My Bids</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {mockBids.length} total bids across your portfolio
+            {bids.length} total bid{bids.length !== 1 ? "s" : ""} across your portfolio
           </p>
         </div>
         <Link href="/">
@@ -58,29 +69,23 @@ export default function BidsPage() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-        {(["won", "submitted", "in_review", "draft", "lost"] as BidStatus[]).map(
-          (status) => {
-            const config = bidStatusConfig[status];
-            return (
-              <button
-                key={status}
-                onClick={() => setFilter(filter === status ? "all" : status)}
-                className={`rounded-xl border p-3 text-center transition-all shadow-sm ${
-                  filter === status
-                    ? "border-navy/40 bg-navy-light"
-                    : "border-border bg-white hover:bg-gray-50"
-                }`}
-              >
-                <p className="text-xl font-bold tabular-nums">
-                  {statusCounts[status] || 0}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {config.label}
-                </p>
-              </button>
-            );
-          }
-        )}
+        {(["won", "submitted", "in_review", "draft", "lost"] as BidStatus[]).map((status) => {
+          const config = bidStatusConfig[status];
+          return (
+            <button
+              key={status}
+              onClick={() => setFilter(filter === status ? "all" : status)}
+              className={`rounded-xl border p-3 text-center transition-all shadow-sm ${
+                filter === status
+                  ? "border-navy/40 bg-navy-light"
+                  : "border-border bg-white hover:bg-gray-50"
+              }`}
+            >
+              <p className="text-xl font-bold tabular-nums">{statusCounts[status] || 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{config.label}</p>
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-3 mb-6">
@@ -110,7 +115,13 @@ export default function BidsPage() {
         </div>
       </div>
 
-      {filtered.length > 0 ? (
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-28 rounded-xl border border-border bg-white animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length > 0 ? (
         <div className="space-y-3">
           {filtered.map((bid, i) => (
             <BidCard key={bid.id} bid={bid} index={i} />
@@ -123,7 +134,9 @@ export default function BidsPage() {
           </div>
           <p className="text-sm font-medium">No bids found</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Try adjusting your search or filter criteria
+            {bids.length === 0
+              ? "Upload your first RFP to get started"
+              : "Try adjusting your search or filter criteria"}
           </p>
         </div>
       )}

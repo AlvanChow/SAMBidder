@@ -2,45 +2,48 @@
 
 import { motion } from "framer-motion";
 import { Clock, FileCheck, AlertTriangle, XCircle } from "lucide-react";
-import { mockComplianceMatrix } from "@/lib/mock-data";
+import type { BidWithDetails } from "@/lib/supabase/types";
 
-export function BidStats() {
-  const compliant = mockComplianceMatrix.filter(
-    (r) => r.status === "compliant"
-  ).length;
-  const partial = mockComplianceMatrix.filter(
-    (r) => r.status === "partial"
-  ).length;
-  const missing = mockComplianceMatrix.filter(
-    (r) => r.status === "missing"
-  ).length;
-  const total = mockComplianceMatrix.length;
+interface BidStatsProps {
+  bid: BidWithDetails;
+}
+
+export function BidStats({ bid }: BidStatsProps) {
+  const items = bid.compliance_items || [];
+  const compliant = items.filter((r) => r.status === "compliant").length;
+  const partial = items.filter((r) => r.status === "partial").length;
+  const missing = items.filter((r) => r.status === "missing").length;
+  const total = items.length;
+
+  const daysLeft = bid.due_date
+    ? Math.max(0, Math.ceil((new Date(bid.due_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
 
   const stats = [
     {
       label: "Requirements Met",
-      value: `${compliant}/${total}`,
+      value: total > 0 ? `${compliant}/${total}` : "—",
       icon: FileCheck,
       color: "#1a7a3a",
       bgColor: "#e8f5ed",
     },
     {
       label: "Partial",
-      value: partial.toString(),
+      value: total > 0 ? partial.toString() : "—",
       icon: AlertTriangle,
       color: "#c27803",
       bgColor: "#fef7e8",
     },
     {
       label: "Missing",
-      value: missing.toString(),
+      value: total > 0 ? missing.toString() : "—",
       icon: XCircle,
       color: "#BF0A30",
       bgColor: "#fde8ec",
     },
     {
       label: "Time to Due",
-      value: "23 days",
+      value: daysLeft !== null ? `${daysLeft}d` : "—",
       icon: Clock,
       color: "#002868",
       bgColor: "#e6eef8",

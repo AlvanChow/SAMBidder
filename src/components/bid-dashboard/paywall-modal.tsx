@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import {
   CheckCircle2,
   FileDown,
   Shield,
   Zap,
   CreditCard,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -21,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  bidId: string;
 }
 
 const features = [
@@ -29,7 +32,32 @@ const features = [
   { icon: Zap, text: "Executive summary, technical & management volumes" },
 ];
 
-export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
+export function PaywallModal({ open, onOpenChange, bidId }: PaywallModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bidId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError(data.error || "Failed to start checkout.");
+        setLoading(false);
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-white border-border p-0 overflow-hidden">
@@ -91,12 +119,20 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
             </div>
           </div>
 
+          {error && (
+            <p className="text-sm text-red-600 text-center">{error}</p>
+          )}
           <Button
             className="w-full h-11 gap-2 bg-navy text-white hover:bg-navy-dark font-medium"
-            onClick={() => onOpenChange(false)}
+            onClick={handleCheckout}
+            disabled={loading}
           >
-            <CreditCard className="h-4 w-4" />
-            Checkout with Stripe
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CreditCard className="h-4 w-4" />
+            )}
+            {loading ? "Redirecting to Stripe..." : "Checkout with Stripe"}
           </Button>
 
           <p className="text-center text-[11px] text-muted-foreground">

@@ -6,7 +6,6 @@ import { Upload, FileText, Link2, Loader2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { simulateUpload } from "@/lib/mock-api";
 
 type UploadState = "idle" | "uploading" | "parsing" | "complete";
 
@@ -21,32 +20,116 @@ const parsingSteps = [
 export function FileUploader() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<UploadState>("idle");
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [error, setError] = useState("");
+
+  const animateProgress = useCallback((onDone: () => void) => {
+    let p = 0;
+    const interval = setInterval(() => {
+      p += Math.random() * 8 + 2;
+      if (p >= 95) {
+        p = 95;
+        clearInterval(interval);
+        onDone();
+      }
+      setProgress(Math.min(p, 95));
+      if (p > 20) setState("parsing");
+      setCurrentStep(Math.min(Math.floor(p / 20), parsingSteps.length - 1));
+    }, 200);
+    return interval;
+  }, []);
 
   const handleFile = useCallback(
     async (file: File) => {
       setFileName(file.name);
+      setError("");
       setState("uploading");
+      setProgress(0);
 
-      await simulateUpload((p) => {
-        setProgress(p);
-        if (p > 20) setState("parsing");
-        const stepIndex = Math.min(
-          Math.floor(p / 20),
-          parsingSteps.length - 1
-        );
-        setCurrentStep(stepIndex);
-      }, 3000);
+      let intervalId: ReturnType<typeof setInterval>;
+      const progressDone = new Promise<void>((resolve) => {
+        intervalId = animateProgress(resolve);
+      });
 
-      setState("complete");
-      await new Promise((r) => setTimeout(r, 500));
-      router.push("/bid/draft-001");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const [res] = await Promise.all([
+          fetch("/api/rfp/upload", { method: "POST", body: formData }),
+          progressDone,
+        ]);
+
+        clearInterval(intervalId!);
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Upload failed");
+        }
+
+        const data = await res.json();
+        setProgress(100);
+        setState("complete");
+        await new Promise((r) => setTimeout(r, 600));
+        router.push(`/bid/${data.bidId}`);
+      } catch (err) {
+        clearInterval(intervalId!);
+        setState("idle");
+        setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      }
     },
-    [router]
+    [router, animateProgress]
+  );
+
+  const handleUrlSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const url = urlInputRef.current?.value?.trim();
+      if (!url) return;
+
+      setFileName(url);
+      setError("");
+      setState("uploading");
+      setProgress(0);
+
+      let intervalId: ReturnType<typeof setInterval>;
+      const progressDone = new Promise<void>((resolve) => {
+        intervalId = animateProgress(resolve);
+      });
+
+      const formData = new FormData();
+      formData.append("rfpUrl", url);
+
+      try {
+        const [res] = await Promise.all([
+          fetch("/api/rfp/upload", { method: "POST", body: formData }),
+          progressDone,
+        ]);
+
+        clearInterval(intervalId!);
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Upload failed");
+        }
+
+        const data = await res.json();
+        setProgress(100);
+        setState("complete");
+        await new Promise((r) => setTimeout(r, 600));
+        router.push(`/bid/${data.bidId}`);
+      } catch (err) {
+        clearInterval(intervalId!);
+        setState("idle");
+        setError(err instanceof Error ? err.message : "Failed to process URL. Please try again.");
+      }
+    },
+    [router, animateProgress]
   );
 
   const handleDrop = useCallback(
@@ -77,19 +160,10 @@ export function FileUploader() {
     [handleFile]
   );
 
-  const handleUrlSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      const mockFile = new File([""], "sam-gov-rfp.pdf", {
-        type: "application/pdf",
-      });
-      handleFile(mockFile);
-    },
-    [handleFile]
-  );
-
   if (state !== "idle") {
-    return <UploadingState state={state} progress={progress} step={currentStep} fileName={fileName} />;
+    return (
+      <UploadingState state={state} progress={progress} step={currentStep} fileName={fileName} />
+    );
   }
 
   return (
@@ -126,11 +200,7 @@ export function FileUploader() {
               isDragging ? "bg-navy/15" : "bg-navy-light"
             }`}
           >
-            <Upload
-              className={`h-7 w-7 transition-colors ${
-                isDragging ? "text-navy" : "text-navy/70"
-              }`}
-            />
+            <Upload className={`h-7 w-7 transition-colors ${isDragging ? "text-navy" : "text-navy/70"}`} />
           </div>
 
           <div>
@@ -149,11 +219,15 @@ export function FileUploader() {
         </motion.div>
       </motion.div>
 
+      {error && (
+        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       <div className="mt-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-xs font-medium text-muted-foreground">
-          OR PASTE A URL
-        </span>
+        <span className="text-xs font-medium text-muted-foreground">OR PASTE A URL</span>
         <div className="h-px flex-1 bg-border" />
       </div>
 
@@ -161,15 +235,13 @@ export function FileUploader() {
         <div className="relative flex-1">
           <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            ref={urlInputRef}
             type="url"
             placeholder="https://sam.gov/opp/..."
             className="h-11 pl-10 bg-white border-border focus:border-navy"
           />
         </div>
-        <Button
-          type="submit"
-          className="h-11 bg-navy text-white hover:bg-navy-dark px-6"
-        >
+        <Button type="submit" className="h-11 bg-navy text-white hover:bg-navy-dark px-6">
           Analyze
         </Button>
       </form>
@@ -213,9 +285,7 @@ function UploadingState({
           </div>
 
           <div className="w-full text-center">
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              {fileName}
-            </p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">{fileName}</p>
             <AnimatePresence mode="wait">
               <motion.p
                 key={step}
@@ -224,9 +294,7 @@ function UploadingState({
                 exit={{ opacity: 0, y: -8 }}
                 className="text-base font-semibold text-foreground"
               >
-                {isComplete
-                  ? "Analysis complete!"
-                  : parsingSteps[step]}
+                {isComplete ? "Analysis complete!" : parsingSteps[step]}
               </motion.p>
             </AnimatePresence>
           </div>
@@ -238,9 +306,7 @@ function UploadingState({
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
               <motion.div
-                className={`h-full rounded-full ${
-                  isComplete ? "bg-success" : "bg-navy"
-                }`}
+                className={`h-full rounded-full ${isComplete ? "bg-success" : "bg-navy"}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3, ease: "easeOut" }}

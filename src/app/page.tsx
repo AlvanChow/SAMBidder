@@ -1,3 +1,5 @@
+"use client";
+
 import { FileUploader } from "@/components/drop-zone/file-uploader";
 import { FeatureCards } from "@/components/home/feature-cards";
 import { TrustBar } from "@/components/home/trust-bar";

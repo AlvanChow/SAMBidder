@@ -1,0 +1,260 @@
+"use client";
+
+import { useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Upload, FileText, Link2, Loader2, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { simulateUpload } from "@/lib/mock-api";
+
+type UploadState = "idle" | "uploading" | "parsing" | "complete";
+
+const parsingSteps = [
+  "Extracting document structure...",
+  "Identifying compliance requirements...",
+  "Mapping FAR/DFAR clauses...",
+  "Analyzing evaluation criteria...",
+  "Building requirement matrix...",
+];
+
+export function FileUploader() {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [state, setState] = useState<UploadState>("idle");
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileName, setFileName] = useState("");
+
+  const handleFile = useCallback(
+    async (file: File) => {
+      setFileName(file.name);
+      setState("uploading");
+
+      await simulateUpload((p) => {
+        setProgress(p);
+        if (p > 20) setState("parsing");
+        const stepIndex = Math.min(
+          Math.floor(p / 20),
+          parsingSteps.length - 1
+        );
+        setCurrentStep(stepIndex);
+      }, 3000);
+
+      setState("complete");
+      await new Promise((r) => setTimeout(r, 500));
+      router.push("/bid/draft-001");
+    },
+    [router]
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+    },
+    [handleFile]
+  );
+
+  const handleUrlSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const mockFile = new File([""], "sam-gov-rfp.pdf", {
+        type: "application/pdf",
+      });
+      handleFile(mockFile);
+    },
+    [handleFile]
+  );
+
+  if (state !== "idle") {
+    return <UploadingState state={state} progress={progress} step={currentStep} fileName={fileName} />;
+  }
+
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onClick={() => fileInputRef.current?.click()}
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-300 ${
+          isDragging
+            ? "border-neon-blue bg-neon-blue/5 glow-blue-strong"
+            : "border-border hover:border-neon-blue/50 hover:bg-neon-blue/[0.02]"
+        }`}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+
+        <motion.div
+          animate={isDragging ? { scale: 1.05, y: -4 } : { scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div
+            className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 ${
+              isDragging ? "bg-neon-blue/20" : "bg-secondary"
+            }`}
+          >
+            <Upload
+              className={`h-7 w-7 transition-colors ${
+                isDragging ? "text-neon-blue" : "text-muted-foreground"
+              }`}
+            />
+          </div>
+
+          <div>
+            <p className="text-lg font-medium">
+              {isDragging ? "Drop your RFP here" : "Upload your RFP"}
+            </p>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Drag & drop a PDF, or click to browse
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
+            <FileText className="h-3.5 w-3.5" />
+            <span>PDF, DOC, DOCX up to 50MB</span>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      <div className="mt-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium text-muted-foreground">
+          OR PASTE A URL
+        </span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
+      <form onSubmit={handleUrlSubmit} className="mt-6 flex gap-3">
+        <div className="relative flex-1">
+          <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="url"
+            placeholder="https://sam.gov/opp/..."
+            className="h-11 pl-10 bg-secondary border-border focus:border-neon-blue/50"
+          />
+        </div>
+        <Button
+          type="submit"
+          className="h-11 bg-neon-blue text-white hover:bg-neon-blue-dim px-6"
+        >
+          Analyze
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+function UploadingState({
+  state,
+  progress,
+  step,
+  fileName,
+}: {
+  state: UploadState;
+  progress: number;
+  step: number;
+  fileName: string;
+}) {
+  const isComplete = state === "complete";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="w-full max-w-lg mx-auto"
+    >
+      <div className="rounded-2xl border border-border bg-card p-8 glow-blue">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <motion.div
+              animate={{ rotate: isComplete ? 0 : 360 }}
+              transition={{
+                duration: 2,
+                repeat: isComplete ? 0 : Infinity,
+                ease: "linear",
+              }}
+              className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
+                isComplete ? "bg-neon-green/20" : "bg-neon-blue/10"
+              }`}
+            >
+              {isComplete ? (
+                <CheckCircle2 className="h-8 w-8 text-neon-green" />
+              ) : (
+                <Loader2 className="h-8 w-8 text-neon-blue animate-spin" />
+              )}
+            </motion.div>
+          </div>
+
+          <div className="w-full text-center">
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              {fileName}
+            </p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={step}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="text-base font-medium"
+              >
+                {isComplete
+                  ? "Analysis complete!"
+                  : parsingSteps[step]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+
+          <div className="w-full">
+            <div className="flex justify-between text-xs text-muted-foreground mb-2">
+              <span>Progress</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+              <motion.div
+                className={`h-full rounded-full ${
+                  isComplete ? "bg-neon-green" : "bg-neon-blue"
+                }`}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

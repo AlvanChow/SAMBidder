@@ -1,11 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Clock } from "lucide-react";
+import Link from "next/link";
 import { BidSidebar } from "@/components/bid-dashboard/bid-sidebar";
 import { PwinTracker } from "@/components/bid-dashboard/pwin-tracker";
+import { BidStats } from "@/components/bid-dashboard/bid-stats";
 import { ComplianceMatrix } from "@/components/bid-dashboard/compliance-matrix";
 import { ProposalArea } from "@/components/bid-dashboard/proposal-area";
 import { PaywallModal } from "@/components/bid-dashboard/paywall-modal";
+import { Badge } from "@/components/ui/badge";
 import { mockRfpDetails } from "@/lib/mock-data";
 
 const pwinBoostMap: Record<string, number> = {
@@ -18,6 +23,7 @@ const pwinBoostMap: Record<string, number> = {
 export default function BidDashboardPage() {
   const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const prevScoreRef = useRef(20);
 
   const pwinScore = useMemo(() => {
     const base = 20;
@@ -29,6 +35,7 @@ export default function BidDashboardPage() {
   }, [uploadedDocs]);
 
   const handleDocumentUpload = (docId: string) => {
+    prevScoreRef.current = pwinScore;
     setUploadedDocs((prev) =>
       prev.includes(docId) ? prev : [...prev, docId]
     );
@@ -36,19 +43,41 @@ export default function BidDashboardPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
-      <div className="border-b border-border bg-card/50">
+      <div className="border-b border-border bg-card/30 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-neon-blue mb-1">
-                Active Bid
-              </p>
-              <h1 className="text-lg font-semibold">
-                {mockRfpDetails.title}
-              </h1>
-              <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                {mockRfpDetails.solicitationNumber}
-              </p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <Link
+                href="/"
+                className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary hover:bg-accent transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge
+                    variant="outline"
+                    className="border-neon-blue/30 bg-neon-blue/5 text-neon-blue text-[10px] h-5"
+                  >
+                    Active Bid
+                  </Badge>
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    {mockRfpDetails.solicitationNumber}
+                  </span>
+                </div>
+                <h1 className="text-base font-semibold truncate sm:text-lg">
+                  {mockRfpDetails.title}
+                </h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-xs text-muted-foreground">
+                    {mockRfpDetails.agency}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    Due {mockRfpDetails.dueDate}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -61,15 +90,28 @@ export default function BidDashboardPage() {
             uploadedDocs={uploadedDocs}
           />
 
-          <div className="flex-1 min-w-0 space-y-8">
-            <div className="flex justify-center rounded-xl border border-border bg-card p-6">
-              <PwinTracker value={pwinScore} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 min-w-0 space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+              <div className="shrink-0 rounded-xl border border-border bg-card p-6">
+                <PwinTracker
+                  value={pwinScore}
+                  previousValue={prevScoreRef.current}
+                />
+              </div>
+              <div className="flex-1 w-full">
+                <BidStats />
+              </div>
             </div>
 
             <ComplianceMatrix />
 
             <ProposalArea onExportClick={() => setPaywallOpen(true)} />
-          </div>
+          </motion.div>
         </div>
       </div>
 

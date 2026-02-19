@@ -123,6 +123,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to generate document' }, { status: 500 });
   }
 }
+```
 
 ## 6. AI Development Principles
 * **Do not hallucinate UI components:** Work within the existing Shadcn/Tailwind structures provided by the Bolt.new scaffolding.

@@ -11,7 +11,7 @@ export function ProfileSection() {
     >
       <div className="flex items-center gap-4 mb-6">
         <Avatar className="h-16 w-16 border-2 border-border">
-          <AvatarFallback className="bg-brand-light text-lg font-semibold text-brand">
+          <AvatarFallback className="bg-navy-light text-lg font-semibold text-navy">
             JD
           </AvatarFallback>
         </Avatar>
@@ -55,7 +55,7 @@ export function ProfileSection() {
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button className="bg-brand text-white hover:bg-brand-dark h-9 text-sm">
+        <Button className="bg-navy text-white hover:bg-navy-dark h-9 text-sm">
           Save Changes
         </Button>
       </div>

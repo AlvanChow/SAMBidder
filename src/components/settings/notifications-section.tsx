@@ -56,7 +56,7 @@ export function NotificationsSection() {
             <button
               onClick={() => toggle(pref.id)}
               className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors ${
-                enabled[pref.id] ? "bg-brand" : "bg-gray-200"
+                enabled[pref.id] ? "bg-navy" : "bg-gray-200"
               }`}
             >
               <span

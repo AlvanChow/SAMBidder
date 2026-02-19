@@ -33,10 +33,10 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-white border-border p-0 overflow-hidden">
-        <div className="bg-gradient-to-b from-brand-light to-transparent px-6 pt-6 pb-4">
+        <div className="bg-gradient-to-b from-navy-light to-transparent px-6 pt-6 pb-4">
           <DialogHeader>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 mb-3">
-              <Zap className="h-6 w-6 text-brand" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy/10 mb-3">
+              <Zap className="h-6 w-6 text-navy" />
             </div>
             <DialogTitle className="text-xl">
               Unlock Your Full Proposal
@@ -92,7 +92,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
           </div>
 
           <Button
-            className="w-full h-11 gap-2 bg-brand text-white hover:bg-brand-dark font-medium"
+            className="w-full h-11 gap-2 bg-navy text-white hover:bg-navy-dark font-medium"
             onClick={() => onOpenChange(false)}
           >
             <CreditCard className="h-4 w-4" />

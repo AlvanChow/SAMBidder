@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Settings, Star } from "lucide-react";
+import { FileText, Settings, Shield } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -19,14 +19,14 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-white/90 backdrop-blur-md">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light transition-all group-hover:bg-brand/15">
-            <Star className="h-4.5 w-4.5 text-brand fill-brand" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-light transition-all group-hover:bg-navy/15">
+            <Shield className="h-4.5 w-4.5 text-navy fill-navy" />
           </div>
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            SAM<span className="text-brand">Bidder</span>
+            SAM<span className="text-navy">Bidder</span>
           </span>
         </Link>
 
@@ -40,7 +40,7 @@ export function Navbar() {
                     href={link.href}
                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-brand/10 text-brand"
+                        ? "bg-navy/10 text-navy"
                         : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     }`}
                   >
@@ -61,7 +61,7 @@ export function Navbar() {
             <TooltipTrigger asChild>
               <button className="ml-2 transition-transform hover:scale-105">
                 <Avatar className="h-8 w-8 border border-border">
-                  <AvatarFallback className="bg-brand-light text-xs font-semibold text-brand">
+                  <AvatarFallback className="bg-navy-light text-xs font-semibold text-navy">
                     JD
                   </AvatarFallback>
                 </Avatar>

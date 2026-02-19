@@ -63,7 +63,7 @@ export function CompanySection() {
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button className="bg-brand text-white hover:bg-brand-dark h-9 text-sm">
+        <Button className="bg-navy text-white hover:bg-navy-dark h-9 text-sm">
           Save Changes
         </Button>
       </div>

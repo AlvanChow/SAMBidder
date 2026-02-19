@@ -51,7 +51,7 @@ export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) 
     <aside className="w-full lg:w-80 shrink-0">
       <div className="rounded-xl border border-border bg-white p-5 shadow-sm sticky top-20">
         <div className="flex items-center gap-2 mb-4">
-          <FileText className="h-4 w-4 text-brand" />
+          <FileText className="h-4 w-4 text-navy" />
           <h2 className="text-sm font-semibold">Bid Context</h2>
         </div>
 
@@ -97,7 +97,7 @@ export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) 
                   className={`w-full justify-start gap-2 h-9 text-xs transition-all ${
                     isUploaded
                       ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-700"
-                      : "hover:border-brand/30 hover:bg-brand-light"
+                      : "hover:border-navy/30 hover:bg-navy-light"
                   }`}
                   onClick={() => handleUpload(doc.id)}
                   disabled={isUploading}
@@ -129,7 +129,7 @@ export function BidSidebar({ onDocumentUpload, uploadedDocs }: BidSidebarProps) 
                   </AnimatePresence>
                   <span className="flex-1 text-left">{doc.label}</span>
                   {!isUploaded && (
-                    <span className="text-[10px] text-brand font-medium">
+                    <span className="text-[10px] text-navy font-medium">
                       +{doc.pwinBoost}%
                     </span>
                   )}

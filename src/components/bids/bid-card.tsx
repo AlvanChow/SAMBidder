@@ -15,7 +15,7 @@ interface BidCardProps {
 export function BidCard({ bid, index }: BidCardProps) {
   const statusConfig = bidStatusConfig[bid.status];
   const pwinColor =
-    bid.pwin >= 70 ? "#2e8b57" : bid.pwin >= 40 ? "#1a73c7" : "#d4880f";
+    bid.pwin >= 70 ? "#1a7a3a" : bid.pwin >= 40 ? "#002868" : "#c27803";
 
   return (
     <motion.div
@@ -38,7 +38,7 @@ export function BidCard({ bid, index }: BidCardProps) {
                   {bid.solicitationNumber}
                 </span>
               </div>
-              <h3 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-brand transition-colors">
+              <h3 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-navy transition-colors">
                 {bid.title}
               </h3>
             </div>
@@ -100,10 +100,10 @@ export function BidCard({ bid, index }: BidCardProps) {
                     width: `${bid.complianceScore}%`,
                     backgroundColor:
                       bid.complianceScore >= 90
-                        ? "#2e8b57"
+                        ? "#1a7a3a"
                         : bid.complianceScore >= 70
-                        ? "#1a73c7"
-                        : "#d4880f",
+                        ? "#002868"
+                        : "#c27803",
                   }}
                 />
               </div>

@@ -33,8 +33,8 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (value / 100) * circumference;
-  const color = value >= 70 ? "#2e8b57" : value >= 40 ? "#1a73c7" : "#d4880f";
-  const bgColor = value >= 70 ? "#eaf5f0" : value >= 40 ? "#e8f2fc" : "#fef7e8";
+  const color = value >= 70 ? "#1a7a3a" : value >= 40 ? "#002868" : "#c27803";
+  const bgColor = value >= 70 ? "#e8f5ed" : value >= 40 ? "#e6eef8" : "#fef7e8";
   const label = value >= 70 ? "Strong" : value >= 40 ? "Moderate" : "Low";
   const delta = value - previousValue;
   const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
@@ -48,7 +48,7 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
             cy="100"
             r={radius}
             fill="none"
-            stroke="#f1f5f9"
+            stroke="#f0f3f7"
             strokeWidth="6"
           />
           <circle
@@ -56,7 +56,7 @@ export function PwinTracker({ value, previousValue = 20 }: PwinTrackerProps) {
             cy="100"
             r={radius}
             fill="none"
-            stroke="#e2e8f0"
+            stroke="#d4dce8"
             strokeWidth="6"
             strokeDasharray="4 8"
             transform="rotate(-90 100 100)"

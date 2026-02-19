@@ -50,7 +50,7 @@ export default function BidsPage() {
           </p>
         </div>
         <Link href="/">
-          <Button className="gap-2 bg-brand text-white hover:bg-brand-dark h-9 text-sm">
+          <Button className="gap-2 bg-navy text-white hover:bg-navy-dark h-9 text-sm">
             <Plus className="h-4 w-4" />
             New Bid
           </Button>
@@ -67,7 +67,7 @@ export default function BidsPage() {
                 onClick={() => setFilter(filter === status ? "all" : status)}
                 className={`rounded-xl border p-3 text-center transition-all shadow-sm ${
                   filter === status
-                    ? "border-brand/40 bg-brand-light"
+                    ? "border-navy/40 bg-navy-light"
                     : "border-border bg-white hover:bg-gray-50"
                 }`}
               >
@@ -100,7 +100,7 @@ export default function BidsPage() {
               onClick={() => setFilter(opt.value)}
               className={`hidden sm:block rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
                 filter === opt.value
-                  ? "bg-brand/10 text-brand"
+                  ? "bg-navy/10 text-navy"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >

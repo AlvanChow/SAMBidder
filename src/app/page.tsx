@@ -12,22 +12,22 @@ export default function HomePage() {
 
       <div className="relative z-10 flex flex-col items-center gap-10 w-full">
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-light px-3.5 py-1.5 text-xs font-medium text-brand mb-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-navy/20 bg-navy-light px-3.5 py-1.5 text-xs font-medium text-navy mb-6">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-patriot-red opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-patriot-red" />
             </span>
-            AI-Powered Bid Generation
+            Proudly Serving American Contractors
           </div>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             Win More{" "}
-            <span className="text-brand">Government</span>
+            <span className="text-navy">U.S. Government</span>
             <br />
             Contracts
           </h1>
           <p className="mt-4 max-w-lg mx-auto text-base text-muted-foreground leading-relaxed">
             Upload your RFP and get a compliant, AI-generated proposal in
-            minutes. The TurboTax for government contracting.
+            minutes. Built for American businesses competing for federal contracts.
           </p>
         </div>
 

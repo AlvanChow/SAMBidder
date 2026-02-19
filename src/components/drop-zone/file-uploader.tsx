@@ -104,8 +104,8 @@ export function FileUploader() {
         onClick={() => fileInputRef.current?.click()}
         className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-300 bg-white shadow-sm ${
           isDragging
-            ? "border-brand bg-brand-light shadow-md"
-            : "border-gray-300 hover:border-brand/50 hover:shadow-md"
+            ? "border-navy bg-navy-light shadow-md"
+            : "border-gray-300 hover:border-navy/50 hover:shadow-md"
         }`}
       >
         <input
@@ -123,12 +123,12 @@ export function FileUploader() {
         >
           <div
             className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300 ${
-              isDragging ? "bg-brand/15" : "bg-brand-light"
+              isDragging ? "bg-navy/15" : "bg-navy-light"
             }`}
           >
             <Upload
               className={`h-7 w-7 transition-colors ${
-                isDragging ? "text-brand" : "text-brand/70"
+                isDragging ? "text-navy" : "text-navy/70"
               }`}
             />
           </div>
@@ -163,12 +163,12 @@ export function FileUploader() {
           <Input
             type="url"
             placeholder="https://sam.gov/opp/..."
-            className="h-11 pl-10 bg-white border-border focus:border-brand"
+            className="h-11 pl-10 bg-white border-border focus:border-navy"
           />
         </div>
         <Button
           type="submit"
-          className="h-11 bg-brand text-white hover:bg-brand-dark px-6"
+          className="h-11 bg-navy text-white hover:bg-navy-dark px-6"
         >
           Analyze
         </Button>
@@ -201,13 +201,13 @@ function UploadingState({
           <div className="relative">
             <div
               className={`flex h-16 w-16 items-center justify-center rounded-2xl ${
-                isComplete ? "bg-success-light" : "bg-brand-light"
+                isComplete ? "bg-success-light" : "bg-navy-light"
               }`}
             >
               {isComplete ? (
                 <CheckCircle2 className="h-8 w-8 text-success" />
               ) : (
-                <Loader2 className="h-8 w-8 text-brand animate-spin" />
+                <Loader2 className="h-8 w-8 text-navy animate-spin" />
               )}
             </div>
           </div>
@@ -239,7 +239,7 @@ function UploadingState({
             <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
               <motion.div
                 className={`h-full rounded-full ${
-                  isComplete ? "bg-success" : "bg-brand"
+                  isComplete ? "bg-success" : "bg-navy"
                 }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}

@@ -9,24 +9,24 @@ const features = [
     title: "AI-Powered Drafting",
     description:
       "Upload your RFP and receive a compliant proposal draft in under 5 minutes.",
-    color: "#1a73c7",
-    bgColor: "#e8f2fc",
+    color: "#002868",
+    bgColor: "#e6eef8",
   },
   {
     icon: ShieldCheck,
     title: "Compliance Guaranteed",
     description:
       "Every FAR, DFAR, and agency-specific clause is mapped and addressed automatically.",
-    color: "#2e8b57",
-    bgColor: "#eaf5f0",
+    color: "#BF0A30",
+    bgColor: "#fde8ec",
   },
   {
     icon: BarChart3,
     title: "pWin Optimization",
     description:
       "Real-time win probability scoring helps you strengthen weak sections before submission.",
-    color: "#d4880f",
-    bgColor: "#fef7e8",
+    color: "#c9a227",
+    bgColor: "#fdf8e8",
   },
 ];
 

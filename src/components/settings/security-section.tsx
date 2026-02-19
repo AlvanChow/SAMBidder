@@ -28,7 +28,7 @@ export function SecuritySection() {
           <Input type="password" className="bg-gray-50 h-9" />
         </div>
         <div className="flex justify-end">
-          <Button className="bg-brand text-white hover:bg-brand-dark h-9 text-sm">
+          <Button className="bg-navy text-white hover:bg-navy-dark h-9 text-sm">
             Update Password
           </Button>
         </div>

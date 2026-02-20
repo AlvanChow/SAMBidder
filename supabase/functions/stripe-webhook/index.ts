@@ -58,6 +58,8 @@ Deno.serve(async (req: Request) => {
           .from("bids")
           .update({
             status: "in_review",
+            paid_at: new Date().toISOString(),
+            stripe_session_id: session.id,
             updated_at: new Date().toISOString(),
           })
           .eq("id", bidId)

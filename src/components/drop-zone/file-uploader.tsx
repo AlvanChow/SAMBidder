@@ -2,10 +2,12 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FileText, Link2, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, FileText, Link2, Loader2, CheckCircle2, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
 
 type UploadState = "idle" | "uploading" | "parsing" | "complete";
 
@@ -19,6 +21,7 @@ const parsingSteps = [
 
 export function FileUploader() {
   const router = useRouter();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<UploadState>("idle");
@@ -46,6 +49,11 @@ export function FileUploader() {
 
   const handleFile = useCallback(
     async (file: File) => {
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
       setFileName(file.name);
       setError("");
       setState("uploading");
@@ -83,12 +91,18 @@ export function FileUploader() {
         setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
       }
     },
-    [router, animateProgress]
+    [router, animateProgress, user]
   );
 
   const handleUrlSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
       const url = urlInputRef.current?.value?.trim();
       if (!url) return;
 
@@ -129,7 +143,7 @@ export function FileUploader() {
         setError(err instanceof Error ? err.message : "Failed to process URL. Please try again.");
       }
     },
-    [router, animateProgress]
+    [router, animateProgress, user]
   );
 
   const handleDrop = useCallback(
@@ -163,6 +177,38 @@ export function FileUploader() {
   if (state !== "idle") {
     return (
       <UploadingState state={state} progress={progress} step={currentStep} fileName={fileName} />
+    );
+  }
+
+  // Unauthenticated: show sign-in prompt instead of upload zone
+  if (!user) {
+    return (
+      <div className="w-full max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative cursor-default rounded-2xl border-2 border-dashed border-gray-300 p-12 text-center bg-white shadow-sm"
+        >
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy-light">
+              <Upload className="h-7 w-7 text-navy/70" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-foreground">Upload your RFP</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Sign in to start analyzing government contracts
+              </p>
+            </div>
+            <Link href="/login">
+              <Button className="gap-2 bg-navy text-white hover:bg-navy-dark h-10 px-6">
+                <LogIn className="h-4 w-4" />
+                Sign in to Upload
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
     );
   }
 

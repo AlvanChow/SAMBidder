@@ -45,14 +45,20 @@ export async function POST(request: Request) {
     .single();
 
   if (bidError) {
+    // Clean up the uploaded file to avoid orphaned storage objects
+    if (rfpFilePath) {
+      await supabase.storage.from("rfp-uploads").remove([rfpFilePath]);
+    }
     return NextResponse.json({ error: bidError.message }, { status: 500 });
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
   const { data: { session } } = await supabase.auth.getSession();
-  const accessToken = session?.access_token || anonKey;
+  if (!session?.access_token) {
+    return NextResponse.json({ error: "Session expired" }, { status: 401 });
+  }
+  const accessToken = session.access_token;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   try {
     const parseResponse = await fetch(
@@ -75,7 +81,10 @@ export async function POST(request: Request) {
       const parseData = await parseResponse.json();
       return NextResponse.json({ bid: { ...bid, ...parseData }, bidId: bid.id });
     }
-  } catch {
+
+    console.error("parse-rfp failed:", parseResponse.status, await parseResponse.text().catch(() => ""));
+  } catch (parseError) {
+    console.error("parse-rfp call failed:", parseError);
   }
 
   return NextResponse.json({ bid, bidId: bid.id });

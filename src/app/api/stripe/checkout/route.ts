@@ -16,9 +16,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing bidId" }, { status: 400 });
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const { data: { session } } = await supabase.auth.getSession();
-  const accessToken = session?.access_token || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  if (!session?.access_token) {
+    return NextResponse.json({ error: "Session expired" }, { status: 401 });
+  }
+  const accessToken = session.access_token;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   const response = await fetch(`${supabaseUrl}/functions/v1/stripe-checkout`, {
     method: "POST",

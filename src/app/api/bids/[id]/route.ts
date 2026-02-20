@@ -49,9 +49,27 @@ export async function PATCH(
 
   const body = await request.json();
 
+  // Whitelist user-editable fields to prevent overwriting computed or sensitive columns
+  const ALLOWED_FIELDS = [
+    "title",
+    "status",
+    "solicitation_number",
+    "agency",
+    "naics_code",
+    "set_aside",
+    "due_date",
+    "estimated_value_min",
+    "estimated_value_max",
+  ] as const;
+  type AllowedField = (typeof ALLOWED_FIELDS)[number];
+
+  const safeUpdate = Object.fromEntries(
+    ALLOWED_FIELDS.filter((k) => k in body).map((k) => [k, body[k as AllowedField]])
+  );
+
   const { data, error } = await supabase
     .from("bids")
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update({ ...safeUpdate, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", user.id)
     .select()

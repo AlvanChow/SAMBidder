@@ -9,9 +9,13 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Omit large text columns (raw_rfp_text, executive_summary, full_proposal)
+  // that are only needed on the bid detail page, not the list view.
   const { data, error } = await supabase
     .from("bids")
-    .select("*")
+    .select(
+      "id, user_id, title, solicitation_number, agency, naics_code, set_aside, status, pwin_score, estimated_value_min, estimated_value_max, due_date, compliance_score, rfp_file_path, rfp_url, created_at, updated_at"
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

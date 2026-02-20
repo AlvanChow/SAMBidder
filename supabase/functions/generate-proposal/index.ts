@@ -1,13 +1,15 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
-
 Deno.serve(async (req: Request) => {
+  // Restrict CORS to the configured frontend origin; falls back to "*" only if SITE_URL is unset
+  const allowedOrigin = Deno.env.get("SITE_URL") ?? "*";
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  };
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -52,6 +54,7 @@ Deno.serve(async (req: Request) => {
       .from("bids")
       .select("*, compliance_items(*)")
       .eq("id", bidId)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (!bid) {

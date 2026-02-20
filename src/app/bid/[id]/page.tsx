@@ -37,20 +37,28 @@ export default function BidDashboardPage({
   const { id } = use(params);
   const [bid, setBid] = useState<BidWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const prevScoreRef = useRef(20);
 
   useEffect(() => {
     fetch(`/api/bids/${id}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load bid (${r.status})`);
+        return r.json();
+      })
       .then((data: BidWithDetails) => {
         setBid(data);
         const existing = (data.bid_documents || []).map((d) => d.doc_type);
         setUploadedDocs(existing);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e: unknown) => {
+        setPageError(e instanceof Error ? e.message : "Failed to load bid");
+        setLoading(false);
+      });
   }, [id]);
 
   const pwinScore = useMemo(() => {
@@ -63,19 +71,29 @@ export default function BidDashboardPage({
 
   const handleDocumentUpload = async (docId: string, file: File) => {
     prevScoreRef.current = pwinScore;
+    setUploadError(null);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("docType", docId);
 
-    const res = await fetch(`/api/bids/${id}/documents`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`/api/bids/${id}/documents`, {
+        method: "POST",
+        body: formData,
+      });
 
-    if (res.ok) {
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        setUploadError((errData as { error?: string }).error || "Upload failed. Please try again.");
+        return;
+      }
+
       setUploadedDocs((prev) => (prev.includes(docId) ? prev : [...prev, docId]));
-      const updated = await fetch(`/api/bids/${id}`).then((r) => r.json());
-      setBid(updated);
+      const updated = await fetch(`/api/bids/${id}`).then((r) => r.json()).catch(() => null);
+      if (updated) setBid(updated);
+    } catch {
+      setUploadError("Network error. Please check your connection and try again.");
     }
   };
 
@@ -90,7 +108,7 @@ export default function BidDashboardPage({
   if (!bid) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
-        <p className="text-sm font-medium">Bid not found</p>
+        <p className="text-sm font-medium">{pageError ?? "Bid not found"}</p>
         <Link href="/bids" className="text-xs text-navy underline">
           Back to My Bids
         </Link>
@@ -139,6 +157,11 @@ export default function BidDashboardPage({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+        {uploadError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {uploadError}
+          </div>
+        )}
         <div className="flex flex-col lg:flex-row gap-6">
           <BidSidebar
             bid={bid}

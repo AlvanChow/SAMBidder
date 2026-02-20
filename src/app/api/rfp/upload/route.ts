@@ -17,8 +17,30 @@ export async function POST(request: Request) {
   let fileName = "";
 
   if (file) {
+    const ALLOWED_MIME_TYPES = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+    const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Upload a PDF, Word document, or plain text file." },
+        { status: 400 }
+      );
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: "File exceeds the 20 MB size limit." },
+        { status: 400 }
+      );
+    }
+
     fileName = file.name;
-    const ext = file.name.split(".").pop();
+    const extMatch = file.name.match(/\.([^./]+)$/);
+    const ext = extMatch ? extMatch[1].toLowerCase() : "bin";
     rfpFilePath = `${user.id}/${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
@@ -45,14 +67,20 @@ export async function POST(request: Request) {
     .single();
 
   if (bidError) {
+    // Clean up the uploaded file to avoid orphaned storage objects
+    if (rfpFilePath) {
+      await supabase.storage.from("rfp-uploads").remove([rfpFilePath]);
+    }
     return NextResponse.json({ error: bidError.message }, { status: 500 });
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
   const { data: { session } } = await supabase.auth.getSession();
-  const accessToken = session?.access_token || anonKey;
+  if (!session?.access_token) {
+    return NextResponse.json({ error: "Session expired" }, { status: 401 });
+  }
+  const accessToken = session.access_token;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   try {
     const parseResponse = await fetch(
@@ -75,7 +103,10 @@ export async function POST(request: Request) {
       const parseData = await parseResponse.json();
       return NextResponse.json({ bid: { ...bid, ...parseData }, bidId: bid.id });
     }
-  } catch {
+
+    console.error("parse-rfp failed:", parseResponse.status, await parseResponse.text().catch(() => ""));
+  } catch (parseError) {
+    console.error("parse-rfp call failed:", parseError);
   }
 
   return NextResponse.json({ bid, bidId: bid.id });

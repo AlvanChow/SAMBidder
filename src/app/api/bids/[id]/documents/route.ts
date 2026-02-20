@@ -32,7 +32,8 @@ export async function POST(
     return NextResponse.json({ error: "Missing file or docType" }, { status: 400 });
   }
 
-  const ext = file.name.split(".").pop();
+  const extMatch = file.name.match(/\.([^./]+)$/);
+  const ext = extMatch ? extMatch[1].toLowerCase() : "bin";
   const filePath = `${user.id}/${bidId}/${docType}.${ext}`;
 
   const { error: uploadError } = await supabase.storage

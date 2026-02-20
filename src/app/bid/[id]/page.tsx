@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, use } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { BidSidebar } from "@/components/bid-dashboard/bid-sidebar";
 import { PwinTracker } from "@/components/bid-dashboard/pwin-tracker";
@@ -12,6 +13,9 @@ import { ProposalArea } from "@/components/bid-dashboard/proposal-area";
 import { PaywallModal } from "@/components/bid-dashboard/paywall-modal";
 import { Badge } from "@/components/ui/badge";
 import type { BidWithDetails } from "@/lib/supabase/types";
+
+const POLL_INTERVAL_MS = 4000;
+const POLL_TIMEOUT_MS = 90000;
 
 const pwinBoostMap: Record<string, number> = {
   "past-performance": 25,
@@ -35,31 +39,84 @@ export default function BidDashboardPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const searchParams = useSearchParams();
+  const paymentSuccess = searchParams.get("payment") === "success";
+
   const [bid, setBid] = useState<BidWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [showPaymentBanner, setShowPaymentBanner] = useState(paymentSuccess);
   const prevScoreRef = useRef(20);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchBid = async (): Promise<BidWithDetails | null> => {
+    const r = await fetch(`/api/bids/${id}`);
+    if (!r.ok) throw new Error(`Failed to load bid (${r.status})`);
+    return r.json();
+  };
+
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    if (pollTimeoutRef.current) {
+      clearTimeout(pollTimeoutRef.current);
+      pollTimeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    fetch(`/api/bids/${id}`)
-      .then((r) => {
-        if (!r.ok) throw new Error(`Failed to load bid (${r.status})`);
-        return r.json();
-      })
-      .then((data: BidWithDetails) => {
+    fetchBid()
+      .then((data) => {
+        if (!data) return;
         setBid(data);
         const existing = (data.bid_documents || []).map((d) => d.doc_type);
         setUploadedDocs(existing);
         setLoading(false);
+
+        // Start polling if proposal hasn't been generated yet
+        if (!data.executive_summary) {
+          pollTimerRef.current = setInterval(async () => {
+            try {
+              const updated = await fetchBid();
+              if (!updated) return;
+              setBid(updated);
+              if (updated.executive_summary) {
+                stopPolling();
+              }
+            } catch {
+              // keep polling silently on transient errors
+            }
+          }, POLL_INTERVAL_MS);
+
+          // Hard stop after 90 seconds
+          pollTimeoutRef.current = setTimeout(stopPolling, POLL_TIMEOUT_MS);
+        }
       })
       .catch((e: unknown) => {
         setPageError(e instanceof Error ? e.message : "Failed to load bid");
         setLoading(false);
       });
+
+    return () => stopPolling();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // On payment success, immediately refetch to get updated status
+  useEffect(() => {
+    if (!paymentSuccess) return;
+    fetchBid()
+      .then((data) => {
+        if (data) setBid(data);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentSuccess]);
 
   const pwinScore = useMemo(() => {
     if (!bid) return 20;
@@ -157,6 +214,21 @@ export default function BidDashboardPage({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+        {showPaymentBanner && (
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-800">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              Payment successful! Your full proposal is now unlocked.
+            </div>
+            <button
+              onClick={() => setShowPaymentBanner(false)}
+              className="text-emerald-600 hover:text-emerald-800 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {uploadError && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {uploadError}
@@ -189,6 +261,7 @@ export default function BidDashboardPage({
             <ProposalArea
               executiveSummary={bid.executive_summary}
               fullProposal={bid.full_proposal}
+              bidStatus={bid.status}
               onExportClick={() => setPaywallOpen(true)}
             />
           </motion.div>

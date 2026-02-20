@@ -54,6 +54,7 @@ Deno.serve(async (req: Request) => {
       .from("bids")
       .select("*, compliance_items(*)")
       .eq("id", bidId)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (!bid) {

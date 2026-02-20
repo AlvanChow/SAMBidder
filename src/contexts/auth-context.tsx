@@ -18,30 +18,27 @@ const AuthContext = createContext<AuthContextValue>({
   signOut: async () => {},
 });
 
+// Create the Supabase client once at module level to avoid
+// recreating it on every render of AuthProvider.
+const supabase = createClient();
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
-    const { auth } = supabase;
-    auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
+    // onAuthStateChange fires immediately with the current session,
+    // so a separate getSession() call is not needed.
     const {
       data: { subscription },
-    } = auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signOut = async () => {

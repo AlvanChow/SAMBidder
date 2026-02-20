@@ -22,15 +22,22 @@ export default function BidsPage() {
   const [search, setSearch] = useState("");
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/bids")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load bids (${r.status})`);
+        return r.json();
+      })
       .then((data) => {
         setBids(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : "Failed to load bids");
+        setLoading(false);
+      });
   }, []);
 
   const filtered = bids.filter((bid) => {
@@ -115,7 +122,12 @@ export default function BidsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-sm font-medium text-red-600">{error}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Refresh the page to try again.</p>
+        </div>
+      ) : loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-28 rounded-xl border border-border bg-white animate-pulse" />

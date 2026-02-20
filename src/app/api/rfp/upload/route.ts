@@ -17,8 +17,30 @@ export async function POST(request: Request) {
   let fileName = "";
 
   if (file) {
+    const ALLOWED_MIME_TYPES = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+    const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Upload a PDF, Word document, or plain text file." },
+        { status: 400 }
+      );
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: "File exceeds the 20 MB size limit." },
+        { status: 400 }
+      );
+    }
+
     fileName = file.name;
-    const ext = file.name.split(".").pop();
+    const extMatch = file.name.match(/\.([^./]+)$/);
+    const ext = extMatch ? extMatch[1].toLowerCase() : "bin";
     rfpFilePath = `${user.id}/${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage

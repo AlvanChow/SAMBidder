@@ -70,7 +70,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const openAiKey = Deno.env.get("OPENAI_API_KEY");
+    const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
 
     let parsedData: {
       title: string;
@@ -99,8 +99,10 @@ Deno.serve(async (req: Request) => {
       compliance_requirements: [],
     };
 
-    if (openAiKey && rawText.length > 50) {
+    if (anthropicKey && rawText.length > 50) {
       const prompt = `You are a government contracting expert. Analyze the following RFP text and extract structured data.
+
+Respond with only valid JSON — no markdown, no explanation, just the raw JSON object.
 
 Return a JSON object with these exact fields:
 {
@@ -128,30 +130,30 @@ RFP Text (first 8000 chars):
 ${rawText.substring(0, 8000)}`;
 
       try {
-        const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${openAiKey}`,
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01",
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 1024,
             messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-            temperature: 0.1,
           }),
         });
 
         if (aiRes.ok) {
           const aiData = await aiRes.json();
-          const content = aiData.choices?.[0]?.message?.content;
+          const content = aiData.content?.[0]?.text;
           if (content) {
             parsedData = JSON.parse(content);
           }
         }
       } catch {
       }
-    } else if (!openAiKey) {
+    } else if (!anthropicKey) {
       parsedData = {
         title: rfpFilePath ? rfpFilePath.split("/").pop()?.replace(/\.[^.]+$/, "") || "New RFP" : "New RFP",
         solicitation_number: `SOL-${Date.now().toString().slice(-8)}`,

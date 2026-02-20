@@ -71,12 +71,12 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     const companyName = profile?.company_name || "Your Company";
-    const openAiKey = Deno.env.get("OPENAI_API_KEY");
+    const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
 
     let executiveSummary = "";
     let fullProposal = "";
 
-    if (openAiKey) {
+    if (anthropicKey) {
       const summaryPrompt = `You are a professional government proposal writer. Write a compelling executive summary for this government contract proposal.
 
 Solicitation: ${bid.title}
@@ -89,23 +89,23 @@ Company: ${companyName}
 Write a 3-4 paragraph executive summary that is professional, compelling, and highlights key qualifications. Do not use placeholders - write actual persuasive content. Keep it under 400 words.`;
 
       try {
-        const summaryRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        const summaryRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${openAiKey}`,
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01",
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: summaryPrompt }],
-            temperature: 0.7,
+            model: "claude-sonnet-4-6",
             max_tokens: 600,
+            messages: [{ role: "user", content: summaryPrompt }],
           }),
         });
 
         if (summaryRes.ok) {
           const summaryData = await summaryRes.json();
-          executiveSummary = summaryData.choices?.[0]?.message?.content || "";
+          executiveSummary = summaryData.content?.[0]?.text || "";
         }
       } catch {
       }
@@ -128,23 +128,23 @@ Write sections:
 Each section should be substantive (150-200 words). Use professional government contracting language.`;
 
       try {
-        const proposalRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        const proposalRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${openAiKey}`,
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01",
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: proposalPrompt }],
-            temperature: 0.7,
+            model: "claude-sonnet-4-6",
             max_tokens: 2000,
+            messages: [{ role: "user", content: proposalPrompt }],
           }),
         });
 
         if (proposalRes.ok) {
           const proposalData = await proposalRes.json();
-          fullProposal = proposalData.choices?.[0]?.message?.content || "";
+          fullProposal = proposalData.content?.[0]?.text || "";
         }
       } catch {
       }

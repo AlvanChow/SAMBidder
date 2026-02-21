@@ -36,9 +36,29 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
+  // Whitelist fields to prevent mass assignment of computed/sensitive columns
+  // (e.g. pwin_score, compliance_score, paid_at, stripe_session_id).
+  const ALLOWED_FIELDS = [
+    "title",
+    "status",
+    "solicitation_number",
+    "agency",
+    "naics_code",
+    "set_aside",
+    "due_date",
+    "estimated_value_min",
+    "estimated_value_max",
+    "rfp_file_path",
+    "rfp_url",
+  ] as const;
+
+  const safeInsert = Object.fromEntries(
+    ALLOWED_FIELDS.filter((k) => k in body).map((k) => [k, body[k]])
+  );
+
   const { data, error } = await supabase
     .from("bids")
-    .insert({ ...body, user_id: user.id })
+    .insert({ ...safeInsert, user_id: user.id })
     .select()
     .single();
 

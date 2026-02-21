@@ -62,6 +62,49 @@ Deno.serve(async (req: Request) => {
         rawText = await fileData.text();
       }
     } else if (rfpUrl) {
+      // Validate URL to prevent SSRF attacks against internal services
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(rfpUrl);
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid URL" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!["https:", "http:"].includes(parsedUrl.protocol)) {
+        return new Response(JSON.stringify({ error: "Only HTTP(S) URLs are allowed" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Block requests to private/internal IP ranges and cloud metadata endpoints
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const blockedPatterns = [
+        /^localhost$/,
+        /^127\./,
+        /^10\./,
+        /^172\.(1[6-9]|2\d|3[01])\./,
+        /^192\.168\./,
+        /^169\.254\./,   // AWS/cloud metadata endpoint
+        /^0\./,
+        /^\[::1\]$/,     // IPv6 loopback
+        /^\[fc/,         // IPv6 private
+        /^\[fd/,         // IPv6 private
+        /^\[fe80:/,      // IPv6 link-local
+        /^metadata\./,   // GCP metadata
+        /\.internal$/,   // internal domains
+      ];
+
+      if (blockedPatterns.some((p) => p.test(hostname))) {
+        return new Response(JSON.stringify({ error: "URL not allowed" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       try {
         const res = await fetch(rfpUrl);
         rawText = await res.text();

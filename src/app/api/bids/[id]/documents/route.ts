@@ -32,6 +32,43 @@ export async function POST(
     return NextResponse.json({ error: "Missing file or docType" }, { status: 400 });
   }
 
+  // Validate docType against allowed values to prevent path traversal
+  const ALLOWED_DOC_TYPES = [
+    "past-performance",
+    "capability-statement",
+    "team-resumes",
+    "certifications",
+  ];
+  if (!ALLOWED_DOC_TYPES.includes(docType)) {
+    return NextResponse.json(
+      { error: `Invalid document type. Allowed: ${ALLOWED_DOC_TYPES.join(", ")}` },
+      { status: 400 }
+    );
+  }
+
+  // Validate file type
+  const ALLOWED_MIME_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return NextResponse.json(
+      { error: "Unsupported file type. Upload a PDF, Word document, or plain text file." },
+      { status: 400 }
+    );
+  }
+
+  // Validate file size (20 MB limit)
+  const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    return NextResponse.json(
+      { error: "File exceeds the 20 MB size limit." },
+      { status: 400 }
+    );
+  }
+
   const extMatch = file.name.match(/\.([^./]+)$/);
   const ext = extMatch ? extMatch[1].toLowerCase() : "bin";
   const filePath = `${user.id}/${bidId}/${docType}.${ext}`;

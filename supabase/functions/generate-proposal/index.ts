@@ -195,7 +195,8 @@ We maintain a robust Quality Management System aligned with ISO 9001 standards. 
         status: "draft",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", bidId);
+      .eq("id", bidId)
+      .eq("user_id", user.id);
 
     return new Response(
       JSON.stringify({ success: true, bidId }),

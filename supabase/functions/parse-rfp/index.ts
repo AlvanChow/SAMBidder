@@ -106,10 +106,48 @@ Deno.serve(async (req: Request) => {
       }
 
       try {
-        const res = await fetch(rfpUrl);
-        rawText = await res.text();
+        // Disable automatic redirect following to prevent SSRF bypass
+        // (attacker hosts a URL that 302-redirects to internal/metadata endpoints)
+        const res = await fetch(rfpUrl, { redirect: "manual" });
+
+        if (res.status >= 300 && res.status < 400) {
+          return new Response(JSON.stringify({ error: "URL redirects are not allowed" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        if (!res.ok) {
+          return new Response(JSON.stringify({ error: "Failed to fetch URL" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Limit response size to 25 MB to prevent memory exhaustion
+        const MAX_RESPONSE_BYTES = 25 * 1024 * 1024;
+        const contentLength = res.headers.get("content-length");
+        if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_BYTES) {
+          return new Response(JSON.stringify({ error: "URL content exceeds size limit" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const buffer = await res.arrayBuffer();
+        if (buffer.byteLength > MAX_RESPONSE_BYTES) {
+          return new Response(JSON.stringify({ error: "URL content exceeds size limit" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        rawText = new TextDecoder().decode(buffer);
       } catch {
-        rawText = `RFP from URL: ${rfpUrl}`;
+        return new Response(JSON.stringify({ error: "Failed to fetch URL" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
@@ -231,7 +269,7 @@ ${rawText.substring(0, 8000)}`;
       updated_at: new Date().toISOString(),
     };
 
-    await supabase.from("bids").update(updatePayload).eq("id", bidId);
+    await supabase.from("bids").update(updatePayload).eq("id", bidId).eq("user_id", user.id);
 
     if (parsedData.compliance_requirements?.length > 0) {
       const complianceInserts = parsedData.compliance_requirements.map((r) => ({

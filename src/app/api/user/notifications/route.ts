@@ -16,7 +16,8 @@ export async function GET() {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Notification preferences error:", error.message);
+    return NextResponse.json({ error: "Failed to process notification preferences" }, { status: 500 });
   }
 
   return NextResponse.json(
@@ -54,7 +55,8 @@ export async function PUT(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Notification preferences error:", error.message);
+    return NextResponse.json({ error: "Failed to process notification preferences" }, { status: 500 });
   }
 
   return NextResponse.json(data);

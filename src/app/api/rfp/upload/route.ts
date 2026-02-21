@@ -48,7 +48,8 @@ export async function POST(request: Request) {
       .upload(rfpFilePath, file);
 
     if (uploadError) {
-      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+      console.error("Storage upload error:", uploadError.message);
+      return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
     }
   }
 
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
     if (rfpFilePath) {
       await supabase.storage.from("rfp-uploads").remove([rfpFilePath]);
     }
-    return NextResponse.json({ error: bidError.message }, { status: 500 });
+    console.error("Bid insert error:", bidError.message);
+    return NextResponse.json({ error: "Failed to create bid" }, { status: 500 });
   }
 
   const { data: { session } } = await supabase.auth.getSession();

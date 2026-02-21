@@ -260,7 +260,7 @@ export function FileUploader() {
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <FileText className="h-3.5 w-3.5" />
-            <span>PDF, DOC, DOCX up to 50MB</span>
+            <span>PDF, DOC, DOCX up to 20MB</span>
           </div>
         </motion.div>
       </motion.div>

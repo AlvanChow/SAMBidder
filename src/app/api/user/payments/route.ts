@@ -17,7 +17,8 @@ export async function GET() {
     .order("paid_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Payments list error:", error.message);
+    return NextResponse.json({ error: "Failed to load payment history" }, { status: 500 });
   }
 
   return NextResponse.json(data ?? []);

@@ -20,7 +20,8 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Bids list error:", error.message);
+    return NextResponse.json({ error: "Failed to load bids" }, { status: 500 });
   }
 
   return NextResponse.json(data);
@@ -63,7 +64,8 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Bid create error:", error.message);
+    return NextResponse.json({ error: "Failed to create bid" }, { status: 500 });
   }
 
   return NextResponse.json(data, { status: 201 });

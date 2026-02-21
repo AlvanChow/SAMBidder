@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: bidId } = await params;
+  if (!UUID_RE.test(bidId)) {
+    return NextResponse.json({ error: "Invalid bid ID" }, { status: 400 });
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -78,7 +83,8 @@ export async function POST(
     .upload(filePath, file, { upsert: true });
 
   if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    console.error("Document upload error:", uploadError.message);
+    return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
   }
 
   await supabase
@@ -101,7 +107,8 @@ export async function POST(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Document record insert error:", error.message);
+    return NextResponse.json({ error: "Failed to save document record" }, { status: 500 });
   }
 
   const pwinBoostMap: Record<string, number> = {
@@ -135,6 +142,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: bidId } = await params;
+  if (!UUID_RE.test(bidId)) {
+    return NextResponse.json({ error: "Invalid bid ID" }, { status: 400 });
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -149,7 +159,8 @@ export async function GET(
     .eq("user_id", user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Documents list error:", error.message);
+    return NextResponse.json({ error: "Failed to load documents" }, { status: 500 });
   }
 
   return NextResponse.json(data);
